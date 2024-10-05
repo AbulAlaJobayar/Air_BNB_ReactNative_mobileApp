@@ -14,7 +14,7 @@
 
 //   ];
 export const Categories=[
-    { "name": "Beachfront", "icon": "hiking" },
+    { "name": "All", "icon": "hiking" },
     { "name": "Cabins", "icon": "terrain" },
     { "name": "Camping", "icon": "beach" },
     { "name": "Lakefront", "icon": "city" },

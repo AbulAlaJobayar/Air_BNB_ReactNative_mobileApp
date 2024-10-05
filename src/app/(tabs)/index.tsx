@@ -14,13 +14,27 @@ import { Categories } from "@/src/data/categorydata";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export default function Home() {
-  const headerHight = useHeaderHeight();
+  const headerHeight = useHeaderHeight();
   const [searchQuery, setSearchQuery] = React.useState("");
-  const ref = useRef<TouchableOpacity[]>([]);
-const [activeIndex,setActiveIndex]=useState(0)
-  const handleSelectedcategory=(index:number)=>{
-    setActiveIndex(index)
-  }
+  const ref = useRef<(TouchableOpacity | null)[]>([]);
+  const scrollRef = useRef<ScrollView>(null);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [category, setCategory] = useState("all");
+
+  const handleSelectedCategory = (index: number) => {
+    setActiveIndex(index);
+    const selectedCategory = ref.current[index];
+    if (selectedCategory) {
+      selectedCategory.measure((x) => {
+        scrollRef.current?.scrollTo({
+          x,
+          y: 0,
+          animated: true,
+        });
+      });
+    }
+  };
 
   return (
     <>
@@ -50,88 +64,64 @@ const [activeIndex,setActiveIndex]=useState(0)
                 shadowRadius: 3,
               }}
             >
-              <Ionicons name="notifications" size={24} color={"#999"} />
+              <Ionicons name="notifications" size={24} color="#999" />
             </TouchableOpacity>
           ),
         }}
       />
-      <View style={[style.container, { paddingTop: headerHight }]}>
+      <View style={[styles.container, { paddingTop: headerHeight }]}>
         <View>
-          <Text style={[style.headingText, { paddingVertical: 10 }]}>
-            Explore The Beautiful Word !
+          <Text style={[styles.headingText, { paddingVertical: 10 }]}>
+            Explore The Beautiful World!
           </Text>
         </View>
 
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <View style={styles.searchSection}>
           <Searchbar
-            style={{ backgroundColor: "#FFF", borderRadius: 10, width: "80%" }}
+            style={styles.searchBar}
             placeholder="Search"
             onChangeText={setSearchQuery}
             value={searchQuery}
           />
 
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#f48c06",
-              paddingHorizontal: 20,
-              paddingVertical: 12,
-              borderRadius: 10,
-            }}
-          >
-            <Ionicons name="options" size={24} color={"#FFF"} />
+          <TouchableOpacity style={styles.optionsButton}>
+            <Ionicons name="options" size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
 
-        {/* category */}
+        {/* Categories Section */}
         <View>
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: "600",
-              marginVertical: 10,
-            }}
-          >
-            Categories
-          </Text>
+          <Text style={styles.categoryTitle}>Categories</Text>
           <ScrollView
+            ref={scrollRef}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              gap: 10,
-            }}
+            contentContainerStyle={styles.categoryContainer}
           >
             {Categories.map(({ name, icon }, index) => (
               <TouchableOpacity
                 key={index}
-                ref={(el) => ref.current[index] == el}
-                onPress={()=>handleSelectedcategory(index)}
-                style={{
-                  flex: 1,
-                  flexDirection: "row",
-                  backgroundColor: activeIndex=== index 
-              ? "#f48c06": "#FFF", 
-                  borderRadius: 10,
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginHorizontal: 10,
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
-                }}
+                ref={(el) => (ref.current[index] = el)} // Assigning ref correctly
+                onPress={() => handleSelectedCategory(index)}
+                style={[
+                  styles.categoryButton,
+                  {
+                    backgroundColor: activeIndex === index ? "#f48c06" : "#FFF",
+                  },
+                ]}
               >
                 <MaterialCommunityIcons
                   name={icon as any}
                   size={24}
-                  color={activeIndex==index?"#FFF":"#f48c06"}
+                  color={activeIndex === index ? "#FFF" : "#f48c06"}
                 />
-                <Text style={{
-                    color:activeIndex==index?"#FFF":"#f48c06"
-                }}>{name}</Text>
+                <Text
+                  style={{
+                    color: activeIndex === index ? "#FFF" : "#f48c06",
+                  }}
+                >
+                  {name}
+                </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -140,7 +130,8 @@ const [activeIndex,setActiveIndex]=useState(0)
     </>
   );
 }
-const style = StyleSheet.create({
+
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
@@ -151,5 +142,39 @@ const style = StyleSheet.create({
     fontWeight: "800",
     color: "black",
     marginTop: 10,
+  },
+  searchSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  searchBar: {
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    width: "80%",
+  },
+  optionsButton: {
+    backgroundColor: "#f48c06",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+  categoryTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginVertical: 10,
+  },
+  categoryContainer: {
+    gap: 10,
+  },
+  categoryButton: {
+    flex: 1,
+    flexDirection: "row",
+    borderRadius: 10,
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginHorizontal: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
 });
